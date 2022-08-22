@@ -2,5 +2,6 @@ image:
   file: .gitpod.Dockerfile
 tasks:
   - name: Run tests
-    command: conftest test --policy docker_test.rego students/Dockerfile     
+    command: watch -n 2 --color \ 
+             conftest test --policy docker_test.rego students/Dockerfile     
     openMode: split-right
