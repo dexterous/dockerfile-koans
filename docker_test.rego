@@ -1,4 +1,15 @@
 package main
+import future.keywords.in
+
+find_users(x, idx) {
+    contains(x.Cmd, "user")
+    idx
+}
+
+find_roots(x, idx) {
+    contains(x.Value[0], "root")
+    idx
+}
 
 suspicious_env_keys = [
     "passwd",
@@ -22,51 +33,12 @@ image_tag_list = [
     "LATEST",
 ]
 
-# Looking for suspicious environment variable settings
-deny[msg] {    
-    dockerenvs := [val | input[i].Cmd == "env"; val := input[i].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    lower(envvar) == suspicious_env_keys[_]
-    msg = sprintf("Potential secret in ENV found: %s", [envvar])
-}
-
-# Looking for suspicious environment variable settings
-deny[msg] {
-    dockerenvs := [val | input[i].Cmd == "env"; val := input[i].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    startswith(lower(envvar), suspicious_env_keys[_])
-    msg = sprintf("Potential secret in ENV found: %s", [envvar])
-}
-
-# Looking for suspicious environment variable settings
-deny[msg] {
-    dockerenvs := [val | input[i].Cmd == "env"; val := input[i].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    endswith(lower(envvar), suspicious_env_keys[_])
-    msg = sprintf("Potential secret in ENV found: %s", [envvar])
-}
-
-# Looking for suspicious environment variable settings
-deny[msg] {
-    dockerenvs := [val | input[i].Cmd == "env"; val := input[i].Value]
-    dockerenv := dockerenvs[_]
-    envvar := dockerenv[_]
-    parts := regex.split("[ :=_-]", envvar)
-    part := parts[_]
-    lower(part) == suspicious_env_keys[_]
-    msg = sprintf("Potential secret in ENV found: %s", [envvar])
-}
-
 # Looking for latest docker image used
 deny[msg] {
     input[i].Cmd == "from"
     val := split(input[i].Value[0], ":")
     count(val) == 1
     msg = sprintf("Do not use latest tag with image: %s", [val])
-    trace("hellooooooooooo")
 }
 
 # Looking for latest docker image used
@@ -92,6 +64,20 @@ deny[msg] {
     msg = sprintf("Use COPY instead of ADD: %s", [val])
 }
 
+# Correct usage of expose
+deny[msg] {
+    some "127.0.0.1" in input[i].Value
+    msg = sprintf("Use of 127.0.0.1 in a dockerfile intended for kubernetes %s", [input[i].Value])
+}
+
+# The final USER line must not be root
+deny[msg] {      
+    userLines := {i | input[i]; find_users(input[i], i)}
+    rootLines := {i | input[i]; find_roots(input[i], i)}
+    max(userLines) == max(rootLines)
+    msg = sprintf("%s", ["Use of root in final USER line is not permitted"])
+}
+
 # sudo usage
 deny[msg] {
     input[i].Cmd == "run"
@@ -100,8 +86,9 @@ deny[msg] {
     msg = sprintf("Avoid using 'sudo' command: %s", [val])
 }
 
-# # No Healthcheck usage
-# deny[msg] {
-#     input[i].Cmd == "healthcheck"
-#     msg := "no healthcheck"
+# No Healthcheck usage
+deny[msg] {
+    input[i].Cmd == "healthcheck"
+    msg := "no healthcheck"
+}
 

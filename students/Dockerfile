@@ -1,16 +1,16 @@
 FROM ubuntu:latest
-LABEL MAINTAINER "Madhu Akula"
-
-ENV SECRET AKIGG23244GN2344GHG
-ENV GITLAB_API_ID gig32oig3bgi34gb43gb43uigb43i 
-
+LABEL MAINTAINER "Student"
 WORKDIR /app
 
 ADD app /app
 COPY README.md /app/README.md
 ADD code /tmp/code
 RUN sudo apt-get udpate
-
 RUN apt-get update && apt-get install -y htop
+RUN apk upgrade
 
-CMD ["/bin/bash", "/app/entrypoint.sh"]
+USER root
+HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "executable" ]
+CMD [".venv/bin/uvicorn", "api.main:api", "--host", "127.0.0.1", "--port", "8000"]
+ENTRYPOINT ["docker-entrypoint.sh"]
+
