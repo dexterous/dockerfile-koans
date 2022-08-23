@@ -3,5 +3,5 @@ image:
 tasks:
   - name: Run tests
     command: watch -n 2 --color \ 
-             conftest test --policy docker_test.rego students/Dockerfile     
+             conftest test --policy docker_test.rego excercise-one/Dockerfile     
     openMode: split-right
