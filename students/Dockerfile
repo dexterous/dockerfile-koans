@@ -1,4 +1,4 @@
-FROM ubuntu:latest
+FROM ubuntu:latest as builder
 LABEL MAINTAINER "Student"
 WORKDIR /app
 

@@ -1,12 +1,15 @@
 package main
 import future.keywords.in
 
+# Find USER lines
 find_users(x, idx) {
     contains(x.Cmd, "user")
     idx
 }
 
+# Find USER lines with root
 find_roots(x, idx) {
+    contains(x.Cmd, "user")
     contains(x.Value[0], "root")
     idx
 }
@@ -92,3 +95,11 @@ deny[msg] {
     msg := "no healthcheck"
 }
 
+# Missing layers
+# some "as" in input[i].Value 
+deny[msg] {
+    input[i].Cmd == "from"
+    val = input[i]
+    "as" in val.Value[j]
+    msg = sprintf("ASDF: %s", ["layer must have a name"])
+}
