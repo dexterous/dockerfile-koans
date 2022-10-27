@@ -5,9 +5,9 @@ WORKDIR /app
 ADD app /app
 COPY README.md /app/README.md
 ADD code /tmp/code
-RUN sudo apt-get udpate
-RUN apt-get update && apt-get install -y htop
-RUN apk upgrade
+RUN sudo apt-get update
+RUN apt-get install -y htop
+RUN apt-get upgrade
 
 USER root
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 CMD [ "executable" ]
