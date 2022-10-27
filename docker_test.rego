@@ -92,7 +92,7 @@ deny[msg] {
 # No Healthcheck usage
 deny[msg] {
     input[i].Cmd == "healthcheck"
-    msg := "no healthcheck"
+    msg := "Avoid using HEALTHCHECK"
 }
 
 # Missing layers
